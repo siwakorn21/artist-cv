@@ -94,10 +94,7 @@ async def create_upload_file(content_image: UploadFile, style_image: UploadFile)
   uploadImage()
 
   return { "image_url": "https://comp-cv-artist-1.s3.ap-southeast-1.amazonaws.com/result.jpeg" }
-  # return FileResponse("assets/images/result.jpeg")
-  # return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/png")
 
 if __name__ == "__main__":
-  # uploadImage()
   uvicorn.run(app, host="0.0.0.0", port=8000)
   
