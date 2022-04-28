@@ -41,12 +41,25 @@ const FileUploader: React.FC<FileUploadProps> = ({ file, onChange }) => {
         }
     }, [file]);
 
+    const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files) {
+            const file = files[0];
+            if (!file.name.includes('.png') && !file.name.includes('jpeg')) {
+                alert('File type should be PNG or JPEG');
+                return;
+            } else {
+                onChange(e);
+            }
+        }
+    };
+
     return (
         <FileUploaderContainer>
             <div className="image-container">
                 <img src={objectUrl} />
             </div>
-            <input type="file" onChange={onChange} />
+            <input type="file" onChange={handleOnChange} />
         </FileUploaderContainer>
     );
 };
