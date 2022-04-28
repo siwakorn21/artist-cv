@@ -7,7 +7,10 @@ from fastapi import FastAPI, File, UploadFile
 import uvicorn
 from pydantic import BaseModel
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List
+from starlette.responses import StreamingResponse
+import boto3
 
 os.environ['TFHUB_MODEL_LOAD_FORMAT'] = 'COMPRESSED'
 
@@ -55,9 +58,25 @@ def run_model(content_image, style_image):
   stylized_image = hub_model(tf.constant(content_image), tf.constant(style_image))[0]
   tensor_to_image(stylized_image).save("assets/images/result.jpeg")
 
+def uploadImage():
+  ACCESS_KEY_ID = "AKIAYU67Y5BQB4WMU57E"
+  SECRET_ACCESS_KEY = "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"
+  client = boto3.client('s3', aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=SECRET_ACCESS_KEY, region_name='ap-southeast-1')
+  client.upload_file('assets/images/result.jpeg', 'comp-cv-artist-1', 'result.jpeg')
+
 app = FastAPI()
 
-@app.post("/uploadfile/")
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.post("/styletransfer")
 async def create_upload_file(content_image: UploadFile, style_image: UploadFile):
   os.system("rm -rf /home/ubuntu/.keras")
   os.system("rm -rf assets/images/*")
@@ -74,7 +93,13 @@ async def create_upload_file(content_image: UploadFile, style_image: UploadFile)
     style_image   = "assets/images/style_image.jpeg"
   )
 
-  return FileResponse("assets/images/result.jpeg")
+  uploadImage()
+
+  return { "image_url": "https://comp-cv-artist-1.s3.ap-southeast-1.amazonaws.com/result.jpeg" }
+  # return FileResponse("assets/images/result.jpeg")
+  # return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/png")
 
 if __name__ == "__main__":
+  # uploadImage()
   uvicorn.run(app, host="0.0.0.0", port=8000)
+  
