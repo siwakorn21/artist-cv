@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from starlette.responses import StreamingResponse
 import boto3
+import os
 
 os.environ['TFHUB_MODEL_LOAD_FORMAT'] = 'COMPRESSED'
 
@@ -59,8 +60,8 @@ def run_model(content_image, style_image):
   tensor_to_image(stylized_image).save("assets/images/result.jpeg")
 
 def uploadImage():
-  ACCESS_KEY_ID = "AKIAYU67Y5BQB4WMU57E"
-  SECRET_ACCESS_KEY = "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"
+  ACCESS_KEY_ID = os.environ['ACCESS_KEY_ID']
+  SECRET_ACCESS_KEY = os.environ['SECRET_ACCESS_KEY']
   client = boto3.client('s3', aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=SECRET_ACCESS_KEY, region_name='ap-southeast-1')
   client.upload_file('assets/images/result.jpeg', 'comp-cv-artist-1', 'result.jpeg')
 
